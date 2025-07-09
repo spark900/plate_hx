@@ -2,15 +2,16 @@
 T_CO2_in = 273.15 + 50;
 T_CO2_out = 273.15 - 40;
 T_coolant_in = 273.15 - 50;
-% T_coolant_out = 273.15 - 40; % It should be less than -30 Celsius at
+% T_coolant_out = 273.15 - 30; % It should be less than -30 Celsius at
 % least.
 
 % Flow rates in kg/s
 m_dot_CO2 = 0.00167;
 m_dot_coolant = 25 * 1000 * 1/60 * 0.87 * 1/1000;
 density_coolant = 0.87;
-length = 0.271; % Breite eines Kanals zwischen zwei Platten.
+length = 0.271; % Breite eines Kanals zwischen zwei Platte (A) 
 width = 0.0024; % Abstand zwischen Zwei Platten.
+height = 0.532; % Höhe der Platten (B)
 u_coolant = m_dot_coolant / (density_coolant * length * width);
 
 
@@ -33,12 +34,12 @@ Distance between two plates: 2.4 mm = 0.0024 m
 
 T_coolant = T_coolant_in; % T_coolant_in must be found depending on 
 % location in the heat exchanger.
-% Logarithmic Temperature difference calculation: VERIFY !
+% Logarithmic Temperature difference calculation
 deltaT1 = T_coolant - T_CO2_in;
 deltaT2 = T_coolant - T_CO2_out;
 LMTD = (deltaT1 - deltaT2) / log(deltaT1 / deltaT2);
 
-characteristic_len = 1/3 * length; % Need to check and verify this
+characteristic_len = (4 * (length * width)) / (2 * height + 2 * length);
 
 Re = (u_coolant * characteristic_len) / visc_coolant; % Reynolds number
 Pr = (c_p_coolant * visc_coolant) / k_coolant; % Prandtl number
@@ -46,8 +47,11 @@ Nu = 0.453 * sqrt(Re) * Pr^(1/3); % Nusselt relation for forced external
 % convection for a flat plate. 
 
 % Calculate heat transfer coefficient
-h = Nu * k_coolant / (T_CO_2_in - T_CO2_out); % Heat transfer coefficient
+h = Nu * k_coolant / (T_CO2_in - T_CO2_out); % Heat transfer coefficient
 
 % Conduction through coolant
-A = 1; % Assume a unit area for simplicity
-Q_conduction = k_coolant * A * (T_CO_2_in - T_CO2_out); % Heat transfer by conduction
+A = length * height; % Area
+T_coolant_core = T_coolant;
+% In the entry point: 
+% T_coolant_core = T_coolant_boundary = T_coolant_in
+% Q_conduction = k_coolant * A * (T_coolant_core - T_coolant_boundary); % Heat transfer by conduction
